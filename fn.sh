@@ -58,6 +58,69 @@ wineproton() {
   clear                                                                                                                                                                                                                                  
   echo "All done!"                                                                                                                                                                                                                       
 }
+selinux_ubuntu() {
+  sudo apt install selinux selinux-basics selinux-policy-default auditd
+  sudo su -c 'wget -O /usr/share/initramfs-tools/scripts/init-bottom/ https://wiki.debian.org/SELinux/Setup?action=AttachFile&do=get&target=_load_selinux_policy
+  update-intramfs -u
+  selinux-activate
+  check-selinux-installation'
+}
+selinux_install() {
+	read -p "Do you want to install SELinux? (Y/n): " install
+	if [ $install = Yy ]; then
+		apt update -y
+		apt install selinux selinux-basics selinux-policy-default auditd -y
+		selinux-activate
+	else
+		echo "Not installing SELinux"
+	fi
+}
+
+selinux_uninstall() {
+read -p "Do you want to uninstall SELinux? (Y/n): " uninstall
+if [ $uninstall = Yy ]; then
+	apt remove selinux selinux-basics selinux-policy-default auditd -y
+	apt autoremove -y
+	update-grub
+else
+	echo "Keeping SELinux in place."
+fi
+}
+
+firewall() {
+if [ ! -f "/usr/sbin/ufw" ]; then
+	read -p "Firewall is not installed. Do you want to install it now? (Y/n):" fw
+	if [ $fw = Yy ]; then
+		apt update
+		apt install ufw -y
+		ufw enable
+	else
+		echo "I wonder why."
+	elif [ -f "/usr/sbin/ufw" ]; then
+		read -p "Firewall is already installed. Do you want to uninstall it? (y/N):" why
+		if [ $why = Yy ]; then
+			ufw disable
+			apt remove ufw
+		else
+			echo "Good decision."
+		fi
+	fi
+fi
+}
+autoupd() {
+	read -p "Do you want to enable automatic updates? (Y/n): " choice
+	if [ $choice = yY ]; then
+		apt update -y
+		apt install -y unattended-upgrades
+		systemctl enable --now unattended-upgrades
+	else
+		echo "You have to update your system manually."
+	fi
+		
+}
 export full
 export steam
 export wineproton
+export selinux_{install,uninstall}
+export firewall
+export autoupd
