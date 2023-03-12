@@ -2,7 +2,19 @@
 figlet "MatuusOS" | lolcat
 echo "Manager for nonfree software"
 echo "Options:"
-printf "\t\t1: Install restricted codecs and fonts"
-printf "\t\t2: (If you have NVIDIA GPU) install drivers for NVIDIA GPU"
-read -p "Choose the option (1|2) or type exit in lowercase: " choice
-
+printf "\t\t1: Install restricted codecs and fonts\n"
+printf "\t\t2: (If you have NVIDIA GPU) install drivers for NVIDIA GPU\n"
+read -p -r "Choose the option (1|2) or type exit in lowercase: " choice
+if [ "$choice" = 2 ]; then
+    clear
+    echo "Installing NVIDIA drivers"
+    apt update
+    ubuntu-drivers install || echo "It crashed"
+fi
+if [ "$choice" = 1 ]; then
+    echo "Installing codecs w/ questionable licencing for watching Netflix"
+    echo "During installation, you have to sell your soul to Microsoft and few other companies. TL;DR: You have to agree to EULA for MS fonts"
+    read -n 1 -s -r -p "Press any key to continue"
+    apt update
+    apt install ubuntu-restricted-extras -y
+fi
